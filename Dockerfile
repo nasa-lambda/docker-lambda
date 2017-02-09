@@ -19,6 +19,7 @@ RUN git clone https://github.com/jeffmcm1977/CMBAnalysis_SummerSchool.git /home/
 #LAMBDA code
 RUN git clone https://github.com/nasa-lambda/cmb_footprint.git /home/jovyan/.ipython/cmb_footprint
 RUN git clone https://github.com/nasa-lambda/cmb_analysis.git /home/jovyan/.ipython/cmb_analysis
+RUN cp /home/jovyan/.ipython/cmb_footprint/footprint.cfg /home/jovyan/footprint.cfg
 
 USER root
 #Installing CAMB and copying the Python demo to local directory
