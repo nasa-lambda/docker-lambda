@@ -38,18 +38,23 @@ COPY Makefile_class_py3 /home/jovyan/class/Makefile
 COPY setup_class_py3.py /home/jovyan/class/python/setup.py
 RUN make
 
+WORKDIR /home/jovyan/work
+
 #ACTPol Python Likelihood
 RUN git clone https://github.com/ACTCollaboration/actpols2_like_py.git /home/jovyan/work/actpols2
 
-WORKDIR /home/jovyan/work
+#CMB power spectrum plotting
+RUN git clone https://github.com/nasa-lambda/cmbpol_plotting.git
 
 #Copying notebooks to working directory
 COPY Introduction.ipynb /home/jovyan/work/
 COPY plot_footprints.ipynb /home/jovyan/work/
 COPY CAMBDemo.ipynb /home/jovyan/work
 COPY ClassDemo.ipynb /home/jovyan/work
-COPY actpol_likelihood_example_v1.ipynb /home/jovyan/work
+COPY actpol_likelihood_example_v2.ipynb /home/jovyan/work
 
+#COPY sets owner to root so this needs to be changed for files to
+#be editable and downloadable
 USER root
-RUN chown $NB_USER:users Introduction.ipynb plot_footprints.ipynb CAMBDemo.ipynb ClassDemo.ipynb actpol_likelihood_example_v1.ipynb
+RUN chown $NB_USER:users Introduction.ipynb plot_footprints.ipynb CAMBDemo.ipynb ClassDemo.ipynb actpol_likelihood_example_v2.ipynb
 USER $NB_USER
