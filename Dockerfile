@@ -51,10 +51,10 @@ COPY Introduction.ipynb /home/jovyan/work/
 COPY plot_footprints.ipynb /home/jovyan/work/
 COPY CAMBDemo.ipynb /home/jovyan/work
 COPY ClassDemo.ipynb /home/jovyan/work
-COPY actpol_likelihood_example_v2.ipynb /home/jovyan/work
+COPY actpol_likelihood_example_v3.ipynb /home/jovyan/work
 
 #COPY sets owner to root so this needs to be changed for files to
 #be editable and downloadable
 USER root
-RUN chown $NB_USER:users Introduction.ipynb plot_footprints.ipynb CAMBDemo.ipynb ClassDemo.ipynb actpol_likelihood_example_v2.ipynb
+RUN chown $NB_USER:users Introduction.ipynb plot_footprints.ipynb CAMBDemo.ipynb ClassDemo.ipynb actpol_likelihood_example_v3.ipynb
 USER $NB_USER
