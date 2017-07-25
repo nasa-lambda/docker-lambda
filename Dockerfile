@@ -7,6 +7,7 @@ RUN pip install --upgrade pip
 
 #So running python2 from command line runs the miniconda python2
 RUN ln -s $CONDA_DIR/envs/python2/bin/python $CONDA_DIR/bin/python2
+RUN ln -s $CONDA_DIR/envs/python2/bin/easy_install $CONDA_DIR/bin/easy_install2
 
 USER $NB_USER
 
@@ -21,10 +22,13 @@ RUN git clone https://github.com/nasa-lambda/cmb_footprint.git /home/jovyan/.ipy
 RUN git clone https://github.com/nasa-lambda/cmb_analysis.git /home/jovyan/.ipython/cmb_analysis
 RUN cp /home/jovyan/.ipython/cmb_footprint/footprint.cfg /home/jovyan/footprint.cfg
 
-USER root
-#Installing CAMB and copying the Python demo to local directory
-RUN pip install --egg camb
-RUN pip2 install --egg camb
+#Installing PyCAMB
+#RUN pip2 install --egg camb
+#RUN pip install --egg camb
+RUN git clone https://github.com/cmbant/CAMB.git /home/jovyan/camb
+WORKDIR /home/jovyan/camb/pycamb
+RUN python setup.py install --user
+RUN python2 setup.py install --user
 
 USER $NB_USER
 
