@@ -1,0 +1,204 @@
+#--------------------------------------------------------
+#--------------------------------------------------------
+#
+#  This is the hammurabi Makefile.  The first part needs to be configured for your system.
+#
+#  You can choose to build:
+#  
+#  hammurabi:  		by default, the basic hammurabi, pure C++, for constant or grid TEs and simple analytic models for CREs
+#  hammurabi.ne2001:  	including linking to the (smooth) NE2001 Fortran code using cfortran.h
+#  hammurabi.galprop:	including both NE2001 and Galprop to simulate the CRE propagation with the hammurabi magnetic field first.
+#  hammurabi.debug:  	including all code, debug flags.
+#  all:			builds all of these.  
+#
+#--------------------------------------------------------
+#--------------------------------------------------------
+
+#
+#  Give the locations of the various libraries.  Should containt include and lib subdirectories.  
+#
+BASE_DIR = $(HOME)/
+HAMMURABI_HOME = $(BASE_DIR)/hammurabi
+GSL = /usr
+FFTW = /usr
+CFITSIO = /usr
+HEALPIX = $(HOME)/Healpix_3.31
+HEALPIX_TARGET = basic_gcc
+SUBDIR = x86_64-linux-gnu
+
+#
+#  These are needed if you build with Galprop
+#
+#GALPROP = $(BASE_DIR)/galprop/galprop/build
+CCFITS = /usr
+CLHEP = /usr
+
+#
+#  What c++ compiler you are using?
+#
+CXX = g++
+#
+# On OSX, maybe
+#CXX = g++-mp-5
+
+#
+#  Compile options?  64bit system (-m64), optimization (-O2), openMP (-fopenmp), warnings (-Wall), etc.
+#
+#CXXFLAGS =  -m64 -O2 -fopenmp -Wall
+#
+#  With OSX g++-mp-4.3
+CXXFLAGS = -fopenmp -O2 -fno-inline-functions -Wall -Wextra -Wno-unknown-pragmas -ansi
+
+#
+#  Which Fortran compiler you are using?  Only if compiling with NE2001 and/or Galprop
+#
+FC = gfortran
+#
+# On OSX, maybe
+#FC = gfortran-mp-5
+
+#  For gfortran
+FCFLAGS = -O2 -ffixed-form -ffixed-line-length-132 -c
+#
+# For ifort 
+#FCFLAGS =-O -extend-source -c
+#
+# For f77 ?
+#FCFLAGS = 
+
+#
+# For linking to C++ with gcc
+#
+LFORTFLAGS= -Df2cFortran 
+
+#
+#  Additional options depending on how you want to run:
+#  
+#  Use openMP.  Right now, this is mandatory.  (Contact
+#   trjaffe@gmail.com for help compiling without if for some reason you
+#   need it.)
+#LFLAGS_CUSTOM = -fopenmp
+#
+#  OSX with gfortran-mp-4.3
+LFLAGS_CUSTOM = -fopenmp 
+#
+
+# 
+#
+#  For J. West using f77 and gcc 4.1.2? 
+#
+#LFORTFLAGS += -L/usr/lib/gcc/x86_64-redhat-linux/3.4.6/ -lgcc -lg2c 
+#LFLAGS_CUSTOM += -lgcc_s
+
+
+#------------------------------------------------------------
+#------------------------------------------------------------
+#
+#  From here onwards, nothing should need to be changed. 
+#
+#------------------------------------------------------------
+#------------------------------------------------------------
+
+hammurabi.debug: CXXFLAGS=-m64 -g -Wall
+
+
+hammurabi: ALL_INC = -I$(CFITSIO)/include -I$(GSL)/include -I. -I$(FFTW)/include -I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include/
+#hammurabi: ALL_INC = -I$(CFITSIO)/include -I$(GSL)/include -I. -I$(FFTW)/include -I$(HEALPIX)/src/cxx/cxxsupport
+hammurabi.ne2001: ALL_INC = -I$(CFITSIO)/include -I$(GSL)/include -I. -I$(FFTW)/include -I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include/
+hammurabi.galprop: ALL_INC = -I$(CFITSIO)/include -I$(GALPROP)/.. -I$(GALPROP)/include/ -I$(CCFITS)/include/ -I$(CLHEP)/include  -I$(GSL)/include -I.  -I$(FFTW)/include -I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include/
+hammurabi.debug: ALL_INC = -I$(CFITSIO)/include -I$(GALPROP)/.. -I$(GALPROP)/include/ -I$(CCFITS)/include/ -I$(CLHEP)/include  -I$(GSL)/include -I.  -I$(FFTW)/include -I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include/
+libhamprop.a: ALL_INC = -I$(CFITSIO)/include -I$(GALPROP)/.. -I$(GALPROP)/include/ -I$(GSL)/include -I.  -I$(FFTW)/include -I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include/
+
+
+hammurabi: ALL_L = -L$(CFITSIO)/lib/$(SUBDIR) -L$(GSL)/lib/$(SUBDIR)  -L$(FFTW)/lib/$(SUBDIR) -L$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/lib/ -L.
+hammurabi.ne2001: ALL_L = -L$(CFITSIO)/lib/$(SUBDIR) -L$(GSL)/lib/$(SUBDIR)  -L$(FFTW)/lib/$(SUBDIR) -L$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/lib/ -L.
+hammurabi.galprop: ALL_L = -L$(CFITSIO)/lib/$(SUBDIR) -L$(GALPROP)/lib/ -L$(CCFITS)/lib/$(SUBDIR) -L$(CLHEP)/lib/$(SUBDIR)  -L$(GSL)/lib/$(SUBDIR)  -L$(FFTW)/lib/$(SUBDIR) -L$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/lib/ -L.
+hammurabi.debug: ALL_L = -L$(CFITSIO)/lib/$(SUBDIR) -L$(GALPROP)/lib/ -L$(CCFITS)/lib/$(SUBDIR) -L$(CLHEP)/lib /$(SUBDIR) -L$(GSL)/lib/$(SUBDIR)  -L$(FFTW)/lib/$(SUBDIR) -L$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/lib/ -L.
+
+
+hammurabi : CXXFLAGS+= $(ALL_INC) -c 
+hammurabi.ne2001:  CXXFLAGS+= $(ALL_INC) -c -DNE2001
+hammurabi.galprop:  CXXFLAGS+= $(ALL_INC) -c -DGALDEF_PATH=\"./GALDEF\" -DFITSDATA_PATH=\"./FITS/\" -DDATA_PATH=\"./DATA\"  -DGALPROP  -DNE2001
+hammurabi.debug : CXXFLAGS+= $(ALL_INC) -c -DGALDEF_PATH=\"./GALDEF\" -DFITSDATA_PATH=\"./FITS/\" -DDATA_PATH=\"./DATA\" -DGALPROP  -DNE2001 -g -Wall
+# Turns off sanity check to avoid some circularity.  See Galprop README.tess
+libhamprop.a: CXXFLAGS+= $(ALL_INC) -c -DGALDEF_PATH=\"./GALDEF\" -DFITSDATA_PATH=\"./FITS/\" -DDATA_PATH=\"./DATA\"  -DLIBHAMPROP -DGALPROP -DNE2001
+
+
+hammurabi:  LFLAGS = $(ALL_L) -lhammurabi -lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio -lgsl -lgslcblas -lm -lfftw3 -lfftw3_threads $(LFLAGS_CUSTOM) 
+hammurabi.ne2001:  LFLAGS = $(ALL_L) -lhammurabi -lNE2001 -lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio -lgsl -lgslcblas -lm -lfftw3 -lfftw3_threads -lgfortran $(LFLAGS_CUSTOM) 
+hammurabi.debug:  LFLAGS = $(ALL_L) -lhammurabi -lNE2001 -lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio -lgsl -lgslcblas -lm -lfftw3 -lfftw3_omp -lgfortran -lgalprop -lskymap -lCCfits -lCLHEP $(LFLAGS_CUSTOM)  
+hammurabi.galprop:  LFLAGS = $(ALL_L) -lhammurabi -lNE2001 -lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio -lgsl -lgslcblas -lm -lfftw3 -lfftw3_omp -lgfortran -lgalprop -lskymap -lCCfits -lCLHEP $(LFLAGS_CUSTOM) 
+
+
+
+default:
+	make hammurabi
+all: 
+	make clean ; make hammurabi ; make clean ; make hammurabi.ne2001; make clean; make hammurabi.galprop ; make clean ; make hammurabi.debug
+
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS)  -o $@ $<
+%.o : %.cc
+	$(CXX) $(CXXFLAGS) -o $@ $<
+%.o : %.c
+	$(CXX) $(CXXFLAGS) -o $@ $<	
+%.o : %.f
+	$(FC) $(FCFLAGS) -o $@ $<
+
+class_TE_density.o: class_TE_density.cpp
+	$(CXX) $(CXXFLAGS) $(LFORTFLAGS) -o $@ $<
+
+NE2001_OBJ = dmdsm.NE2001.o density.NE2001.o neclumpN.o nevoidN.o neLISM.NE2001.o
+
+HAMMURABI_OBJ = class_Integrator.o class_List.o class_B_field2.o tess_tools.o class_TE_density.o class_CRE.o namespace_Vec_Handling.o class_Dust.o
+
+run:
+	mkdir run
+
+$(HAMMURABI_OBJ):	hammurabi.h CGS_units_file.h proto*.h tess_tools.h
+
+libNE2001.a: $(NE2001_OBJ)
+	ar rc $@ $(NE2001_OBJ)
+	ranlib $@
+
+hammurabi: 	$(HAMMURABI_OBJ) libhammurabi.a run hammurabi.o
+	$(CXX) -o run/hammurabi hammurabi.o $(LFLAGS) $(LFORTFLAGS)
+
+hammurabi.ne2001:	$(HAMMURABI_OBJ) $(NE2001_OBJ) $(NE2001_DATA) libNE2001.a libhammurabi.a run hammurabi.o
+	$(CXX) -o run/hammurabi.ne2001 hammurabi.o $(LFLAGS) $(LFORTFLAGS)
+
+hammurabi.galprop: 	$(HAMMURABI_OBJ) $(NE2001_OBJ) $(NE2001_DATA) libNE2001.a libhammurabi.a run hammurabi.o
+	$(CXX) -o run/hammurabi.galprop hammurabi.o $(LFLAGS) $(LFORTFLAGS)
+
+hammurabi.debug: 	$(HAMMURABI_OBJ) $(NE2001_DATA) libNE2001.a libhammurabi.a run hammurabi.o
+	$(CXX) -o run/hammurabi.debug hammurabi.o $(LFLAGS) $(LFORTFLAGS)
+ifeq ($(OSTYPE),darwin)
+	 install_name_tool -change "@rpath/libCLHEP-2.3.3.1.dylib" "$(CLHEP)/lib/libCLHEP-2.3.3.1.dylib" run/hammurabi.debug
+endif
+
+print_constants: print_constants.o
+		 $(CXX) -o run/print_constants print_constants.o 
+
+# To link in B_field to galprop, use this:
+libhamprop.a:  class_B_field2.o tess_tools.o namespace_Vec_Handling.o 
+	ar cru libhamprop.a class_B_field2.o tess_tools.o namespace_Vec_Handling.o 
+
+libhammurabi.a: $(HAMMURABI_OBJ)
+	ar cru libhammurabi.a $(HAMMURABI_OBJ)
+
+
+clean:
+	rm *.a *.o 
+
+test:
+	(cd unit_test; ./test.csh)
+
+test_big:
+	(cd unit_test; ./test.csh big)
+
+
+tarfile:
+	tar cvzf hammurabi.tgz *cpp *h Makefile *.f README hampy
+
+unittar:
+	tar cvzf hammurabi_unit_test.tgz unit_test/inputs unit_test/GALDEF unit_test/FITS unit_test/negrid_n400.bin unit_test/ref.mini unit_test/ref unit_test/ref.big  
