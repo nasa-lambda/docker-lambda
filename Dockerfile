@@ -4,7 +4,7 @@ FROM jupyter/scipy-notebook:latest
 
 #Installing packages and updating stuff
 USER root
-RUN apt-get -y update && apt-get install -y gcc gfortran gsl-bin libgsl-dev libcfitsio-bin libcfitsio-dev libfftw3-bin libfftw3-dev git-svn libccfits0v5 libccfits-dev libclhep2.1v5 libclhep-dev libgcc-11-dev
+RUN apt-get -y update && apt-get install -y gcc gfortran gsl-bin libgsl-dev libcfitsio-bin libcfitsio-dev libfftw3-bin libfftw3-dev git-svn libccfits0v5 libccfits-dev libclhep2.1v5 libclhep-dev libgcc-11-dev cmake vim
 RUN pip install --upgrade pip
 
 USER root
@@ -50,11 +50,9 @@ WORKDIR $HOME
 #RUN wget https://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz
 RUN wget https://downloads.sourceforge.net/project/healpix/Healpix_3.82/Healpix_3.82_2022Jul28.tar.gz
 RUN tar -zxvf Healpix_3.82_2022Jul28.tar.gz
-COPY Makefile_healpix382 $HOME/Healpix_3.82/Makefile
 WORKDIR $HOME/Healpix_3.82
-RUN mkdir bin
-RUN mkdir lib
-RUN mkdir include
+ENV FITSDIR=/usr/lib/aarch64-linux-gnu
+RUN ./configure --auto=all
 RUN make
 
 #Hammurabi
