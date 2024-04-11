@@ -11,6 +11,7 @@ USER root
 
 #USER $NB_USER
 
+RUN conda update --all
 RUN conda install astropy healpy cython emcee
 
 USER $NB_USER
@@ -46,14 +47,14 @@ RUN git clone https://github.com/ACTCollaboration/actpols2_like_py.git $HOME/wor
 RUN git clone https://github.com/nasa-lambda/cmbpol_plotting.git
 
 #Healpix
-WORKDIR $HOME
-#RUN wget https://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz
-RUN wget https://downloads.sourceforge.net/project/healpix/Healpix_3.82/Healpix_3.82_2022Jul28.tar.gz
-RUN tar -zxvf Healpix_3.82_2022Jul28.tar.gz
-WORKDIR $HOME/Healpix_3.82
-ENV FITSDIR=/usr/lib/aarch64-linux-gnu
-RUN ./configure --auto=all
-RUN make
+#WORKDIR $HOME
+##RUN wget https://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz
+#RUN wget https://downloads.sourceforge.net/project/healpix/Healpix_3.82/Healpix_3.82_2022Jul28.tar.gz
+#RUN tar -zxvf Healpix_3.82_2022Jul28.tar.gz
+#WORKDIR $HOME/Healpix_3.82
+#ENV FITSDIR=/usr/lib/aarch64-linux-gnu
+#RUN ./configure --auto=all
+#RUN make
 
 #Hammurabi
 #WORKDIR $HOME
@@ -101,7 +102,11 @@ RUN tar -xvzf b1_hl_likelihood.tgz -C $HOME/work/b1_hl_likelihood
 #Copying notebooks to working directory
 COPY Introduction.ipynb $HOME/work/
 COPY plot_footprints.ipynb $HOME/work/
-COPY CAMBDemo.ipynb $HOME/work/
+# RUN cp ~/.ipython/cmb_footprint/examples/plot_footprints.ipynb $HOME/work/
+
+#COPY CAMBDemo.ipynb $HOME/work/
+RUN cp $HOME/camb/docs/CAMBdemo.ipynb $HOME/work/
+
 COPY ClassDemo.ipynb $HOME/work/
 COPY actpol_likelihood_example.ipynb $HOME/work/
 
@@ -110,6 +115,10 @@ WORKDIR $HOME/work
 #COPY sets owner to root so this needs to be changed for files to
 #be editable and downloadable
 USER root
-RUN chown $NB_USER:users Introduction.ipynb plot_footprints.ipynb CAMBDemo.ipynb ClassDemo.ipynb actpol_likelihood_example.ipynb
+RUN chown $NB_USER:users Introduction.ipynb plot_footprints.ipynb CAMBdemo.ipynb ClassDemo.ipynb actpol_likelihood_example.ipynb
 RUN chown $NB_USER:users b1_hl_likelihood_example.ipynb bicep1_util.py
 USER $NB_USER
+
+RUN curl -fsSL https://install.julialang.org | sh -s -- -y
+RUN /home/jovyan/.juliaup/bin/julia -e 'using Pkg; Pkg.add("IJulia")'
+RUN /home/jovyan/.juliaup/bin/julia -e 'using Pkg; Pkg.add(["Healpix", "Cosmology", "Plots"])'
